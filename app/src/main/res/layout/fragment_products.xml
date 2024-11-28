@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Container com fundo cinza para os dados -->
+        <FrameLayout
+            android:id="@+id/containerProducts"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/fragment_product_layout_border"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/containerAddProduct"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Lista de Produtos -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Mensagem para estado vazio -->
+            <TextView
+                android:id="@+id/textViewEmptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/empty_state_border"
+                android:text="Sem produtos cadastrados!"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"
+                android:gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Container com fundo branco para o botão -->
+        <FrameLayout
+            android:id="@+id/containerAddProduct"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:paddingVertical="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Botão "+Produto" -->
+            <Button
+                android:id="@+id/buttonAddProduct"
+                android:layout_width="120dp"
+                android:layout_height="30dp"
+                android:text="+Produto"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/button_primary"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="4dp" />
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

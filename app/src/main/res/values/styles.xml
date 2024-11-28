@@ -1,0 +1,15 @@
+<resources>
+    <!-- Tema Principal -->
+    <style name="Theme.CoffeeClient" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Personalize cores e estilos -->
+        <item name="colorPrimary">@color/gray</item>
+        <item name="colorPrimaryDark">@color/dark_gray</item>
+        <item name="colorAccent">@color/light_gray</item>
+    </style>
+    <!-- Estilo Customizado para o Diálogo -->
+    <style name="CustomDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+</resources>

@@ -1,0 +1,16 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Fundo do texto -->
+    <solid android:color="@android:color/white" />
+    <!-- Borda do texto -->
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/black" />
+    <!-- Cantos arredondados -->
+    <corners android:radius="8dp" />
+    <!-- Espaçamento interno -->
+    <padding
+        android:left="16dp"
+        android:top="8dp"
+        android:right="16dp"
+        android:bottom="8dp" />
+</shape>

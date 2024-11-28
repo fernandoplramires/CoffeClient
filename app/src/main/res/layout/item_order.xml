@@ -1,0 +1,229 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="order"
+            type="br.com.ramires.gourment.coffeclient.data.model.Order" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="2dp"
+        android:background="@drawable/item_order_background">
+
+        <!-- Título do Pedido -->
+        <TextView
+            android:id="@+id/textViewOrderTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@android:color/black"
+            android:background="@drawable/item_order_header_background"
+            android:textStyle="bold"
+             />
+
+        <!-- Detalhes Expandidos -->
+        <LinearLayout
+            android:id="@+id/layoutOrderDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="2dp">
+
+            <!-- Detalhes do Pedido -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/item_order_section_background">
+
+                <!-- Detalhes do Pedido (Dinâmico) -->
+                <LinearLayout
+                    android:id="@+id/layoutOrderItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/item_order_section_background"
+                    android:padding="8dp">
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Valor Total -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:background="@drawable/item_order_section_background">
+
+                <TextView
+                    android:id="@+id/textViewTotalPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Valor Total: R$ 10,00"
+                    android:textStyle="bold"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            </LinearLayout>
+
+            <!-- Informações do Cliente -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:background="@drawable/item_order_section_background">
+
+                <!-- E-mail -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="E-mail"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody1" />
+                <TextView
+                    android:id="@+id/textViewEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/item_order_field_background"
+                    android:text="cliente@email.com"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Telefone -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Telefone"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody1" />
+                <TextView
+                    android:id="@+id/textViewPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/item_order_field_background"
+                    android:text="(11) 98777-6655"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- CEP -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CEP"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody1" />
+                <TextView
+                    android:id="@+id/textViewZipCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/item_order_field_background"
+                    android:text="06010-100"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Complemento -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Complemento"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody1" />
+                <TextView
+                    android:id="@+id/textViewComplement"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/item_order_field_background"
+                    android:text="Apto 101"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- Número -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Número"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody1" />
+                <TextView
+                    android:id="@+id/textViewNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/item_order_field_background"
+                    android:text="99"
+                    android:textSize="14sp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+            </LinearLayout>
+
+            <!-- Botões e Menu -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/item_order_section_background"
+                android:padding="8dp"
+                android:paddingTop="8dp">
+
+                <!-- Botão Editar e Menu Status -->
+                <Button
+                    android:id="@+id/buttonEditOrder"
+                    android:layout_width="70dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="left"
+                    android:background="@drawable/item_order_button_background"
+                    android:text="Editar"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+
+                <!-- Menu Status -->
+                <Spinner
+                    android:id="@+id/spinnerOrderStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="25dp"
+                    android:layout_weight="2"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_gravity="center"
+                    android:entries="@array/order_status_options"
+                    android:enabled="false"
+                    android:textColor="@color/black"
+                    android:textSize="12sp"
+                    android:scrollbarSize="16dp"
+                    android:textAlignment="center"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <Button
+                    android:id="@+id/buttonSaveOrder"
+                    android:layout_width="70dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="right"
+                    android:background="@drawable/item_order_button_background"
+                    android:text="Salvar"
+                    android:enabled="false"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</layout>

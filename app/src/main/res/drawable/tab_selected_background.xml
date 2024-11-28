@@ -1,0 +1,18 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Sombra -->
+    <item android:right="6dp" android:bottom="6dp">
+        <shape>
+            <solid android:color="#A9A9A9" /> <!-- Cor da sombra -->
+        </shape>
+    </item>
+    <!-- Fundo Azul Claro -->
+    <item>
+        <shape>
+            <solid android:color="@color/light_blue" /> <!-- Azul claro -->
+            <stroke
+                android:width="5dp"
+                android:color="#000000" /> <!-- Borda preta mais espessa -->
+            <corners android:radius="8dp" /> <!-- Cantos arredondados -->
+        </shape>
+    </item>
+</layer-list>

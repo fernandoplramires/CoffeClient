@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayoutItemOrderDetail"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="2dp">
+
+    <!-- Botão de Incremento -->
+    <Button
+        android:visibility="invisible"
+        android:id="@+id/buttonIncreaseQuantity"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/rounded_button_background"
+        android:drawableStart="@drawable/ic_add"
+        android:gravity="center"
+        android:padding="2dp"
+        android:layout_marginEnd="2dp"
+        android:contentDescription="@string/increase_quantity" />
+
+    <!-- Botão de diminuir quantidade -->
+    <Button
+        android:visibility="invisible"
+        android:id="@+id/buttonDecreaseQuantity"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/rounded_button_background"
+        android:drawableStart="@drawable/ic_remove"
+        android:gravity="center"
+        android:padding="2dp"
+        android:contentDescription="@string/decrease_quantity" />
+
+    <!-- Quantidade e nome do item -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <!-- Quantidade do item -->
+        <TextView
+            android:id="@+id/textViewItemQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginEnd="4dp"
+            android:textColor="@color/black"
+            android:gravity="center_vertical" />
+
+        <!-- Nome do item -->
+        <TextView
+            android:id="@+id/textViewItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="Produto A"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <!-- Botão de remover item -->
+    <Button
+        android:visibility="invisible"
+        android:id="@+id/buttonRemoveItem"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:drawableStart="@drawable/ic_delete"
+        android:gravity="center"
+        android:padding="4dp"
+        android:contentDescription="@string/remove_item" />
+</LinearLayout>

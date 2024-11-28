@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "906445914412",
+    "project_id": "coffe-management-48e47",
+    "storage_bucket": "coffe-management-48e47.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906445914412:android:bd3e00b05baf003ea82c89",
+        "android_client_info": {
+          "package_name": "br.com.ramires.gourment.coffeclient"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8229lwM_YE_aHjJ_gS73uDF0z_L-1pzI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
