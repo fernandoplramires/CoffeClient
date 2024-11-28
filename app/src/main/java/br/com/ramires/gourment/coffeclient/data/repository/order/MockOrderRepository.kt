@@ -13,16 +13,19 @@ class MockOrderRepository : OrderRepositoryInterface {
             "946fcb4057657c1a",
             listOf(
                 OrderDetail(
+                    1,
                     "Cookie Cake Red Velvet Oreo 300g",
                     35.5,
                     1
                 ),
                 OrderDetail(
+                    3,
                     "Cookie Cake Nutella 300g",
                     35.5,
                     2
                 ),
                 OrderDetail(
+                    2,
                     "Cupcake Buenasso 300g",
                     20.0,
                     2
@@ -41,6 +44,7 @@ class MockOrderRepository : OrderRepositoryInterface {
             "946fcb4057657c1a",
             listOf(
                 OrderDetail(
+                1,
                 "Cookie Cake Red Velvet Oreo 300g",
                 35.5,
                 2
@@ -59,6 +63,7 @@ class MockOrderRepository : OrderRepositoryInterface {
             "0000000000000",
             listOf(
                 OrderDetail(
+                    1,
                     "Cookie Cake Red Velvet Oreo 300g",
                     35.5,
                     1
@@ -84,6 +89,16 @@ class MockOrderRepository : OrderRepositoryInterface {
 
     override suspend fun getAllOrdersByDeviceId(deviceId: String): List<Order> {
         return orders.filter { it.deviceId == deviceId }
+    }
+
+    override suspend fun getOrderByStatus(status: String): Order? {
+        return orders.find { it.status == status }
+    }
+
+    override suspend fun createOrder(status: String): Order {
+        val newOrder = Order(id = getNextProductId(), status = status, details = mutableListOf())
+        orders.add(newOrder)
+        return newOrder
     }
 
     override suspend fun getNextProductId(): Int {

@@ -50,6 +50,26 @@ class FirebaseOrderRepository : OrderRepositoryInterface {
         }
     }
 
+    override suspend fun getOrderByStatus(status: String): Order? {
+        return try {
+            val snapshot = ordersCollection.whereEqualTo("status", status).get().await()
+            snapshot.documents.mapNotNull { it.toObject(Order::class.java) }[0]
+        } catch (e: Exception) {
+            Log.e("FirebaseOrderRepository", "Error fetching order", e)
+            null
+        }
+    }
+
+    override suspend fun createOrder(status: String): Order {
+        val newOrder = Order(id = getNextProductId(), status = status, details = mutableListOf())
+        try {
+            addOrder(newOrder)
+        } catch (e: Exception) {
+            Log.e("FirebaseOrderRepository", "Error add order", e)
+        }
+        return newOrder
+    }
+
     override suspend fun getNextProductId(): Int {
         val metadataRef = db.collection("metadata").document("productsMaxId")
         return db.runTransaction { transaction ->

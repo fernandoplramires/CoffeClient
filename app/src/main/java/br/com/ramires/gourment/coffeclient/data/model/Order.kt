@@ -11,11 +11,12 @@ enum class OrderStatus(val displayName: String) {
 }
 
 data class OrderDetail(
+    @PropertyName("id") var id: Int? = null,
     @PropertyName("productName") var productName: String? = null,
     @PropertyName("productPrice") var productPrice: Double? = 0.00,
     @PropertyName("quantity") var quantity: Int? = null
 ) {
-    constructor() : this(null, null, null)
+    constructor() : this(null, null, null, null)
 }
 
 data class Order(

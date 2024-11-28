@@ -1,22 +1,26 @@
 package br.com.ramires.gourment.coffeclient.ui.product
 
-import android.content.Context
-import android.net.Uri
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.ramires.gourment.coffeclient.data.model.Order
+import br.com.ramires.gourment.coffeclient.data.model.OrderDetail
 import br.com.ramires.gourment.coffeclient.data.model.Product
+import br.com.ramires.gourment.coffeclient.data.repository.order.OrderRepositoryInterface
 import br.com.ramires.gourment.coffeclient.data.repository.product.ProductRepositoryInterface
-import br.com.ramires.gourment.coffeclient.util.ImageUtils
 import kotlinx.coroutines.launch
 
-class ProductViewModel(private val repository: ProductRepositoryInterface) : ViewModel() {
+class ProductViewModel(
+    private val productsRepository: ProductRepositoryInterface,
+    private val ordersRepository: OrderRepositoryInterface
+) : ViewModel() {
 
     private val _products = MutableLiveData<List<Product>>()
     val products: LiveData<List<Product>> get() = _products
-    var editingProduct: Product? = null
+
+    private val _cartOrder = MutableLiveData<Order?>()
+    val cartOrder: LiveData<Order?> get() = _cartOrder
 
     init {
         loadProducts()
@@ -25,7 +29,7 @@ class ProductViewModel(private val repository: ProductRepositoryInterface) : Vie
     private fun loadProducts() {
         viewModelScope.launch {
             try {
-                val orderList = repository.getAllProducts()
+                val orderList = productsRepository.getAllProducts()
                 _products.postValue(orderList)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -33,57 +37,44 @@ class ProductViewModel(private val repository: ProductRepositoryInterface) : Vie
         }
     }
 
-    fun addProduct(context: Context, product: Product) {
+    fun loadCartOrder() {
         viewModelScope.launch {
             try {
-                if (product.imageUrl != null) {
-                    val imageUri = product.imageUrl.toUri()
-                    val base64Image = ImageUtils.convertImageToBase64(context, imageUri)
-                    val updatedProduct = product.copy(imageUrl = base64Image)
-                    repository.addProduct(updatedProduct)
-                } else {
-                    repository.addProduct(product)
-                }
-                _products.value = repository.getAllProducts().toList()
+                val order = ordersRepository.getOrderByStatus("CARRINHO")
+                _cartOrder.postValue(order)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _cartOrder.postValue(null)
+            }
+        }
+    }
+
+    fun addProductToCart(product: Product) {
+        viewModelScope.launch {
+            try {
+                val order = ordersRepository.getOrderByStatus("CARRINHO") ?: ordersRepository.createOrder("CARRINHO")
+                val updatedDetails = order.details.orEmpty().toMutableList()
+
+                // Adiciona o produto ao carrinho com quantidade 1
+                updatedDetails.add(OrderDetail(product.id, product.name, product.price, 1))
+                order.details = updatedDetails
+                ordersRepository.updateOrder(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun removeProduct(productId: Int) {
+    fun removeProductFromCart(product: Product) {
         viewModelScope.launch {
             try {
-                repository.deleteProduct(productId)
-                _products.value = repository.getAllProducts().toList()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
+                val order = ordersRepository.getOrderByStatus("CARRINHO") ?: return@launch
+                val updatedDetails = order.details.orEmpty().toMutableList()
 
-    fun startEditingProduct(product: Product) {
-        editingProduct = product
-    }
-
-    fun saveEditedProduct(product: Product) {
-        viewModelScope.launch {
-            try {
-                repository.updateProduct(product)
-                _products.value = repository.getAllProducts().toList()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun updateProductImage(context: Context, product: Product, imageUri: Uri) {
-        viewModelScope.launch {
-            try {
-                val base64Image = ImageUtils.convertImageToBase64(context, imageUri)
-                val updatedProduct = product.copy(imageUrl = base64Image)
-                repository.updateProduct(updatedProduct)
-                _products.value = repository.getAllProducts().toList()
+                // Remove o produto do carrinho
+                updatedDetails.removeIf { it.id == product.id }
+                order.details = updatedDetails
+                ordersRepository.updateOrder(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         setupTabLayoutStyle()
         setupTabListener()
 
-        replaceFragment(ProductsFragment(productRepository!!))
+        replaceFragment(ProductsFragment(productRepository!!, orderRepository!!))
     }
 
     private fun initializeRepositories(repositoryType: String?) {
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 tab?.view?.setBackgroundResource(R.drawable.tab_selected_background)
                 when (tab?.position) {
-                    0 -> replaceFragment(ProductsFragment(productRepository!!))
+                    0 -> replaceFragment(ProductsFragment(productRepository!!, orderRepository!!))
                     1 -> replaceFragment(OrdersFragment(orderRepository!!))
                 }
             }
