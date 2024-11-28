@@ -1,7 +1,5 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
-import android.content.Context
-import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +9,7 @@ import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.repository.order.OrderRepositoryInterface
 import kotlinx.coroutines.launch
 
-class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewModel() {
+class OrderViewModel(private val repository: OrderRepositoryInterface, private val deviceId: String) : ViewModel() {
 
     private val _orders = MutableLiveData<List<Order>>()
     val orders: LiveData<List<Order>> get() = _orders
@@ -20,19 +18,14 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
         loadOrders()
     }
 
-    fun getDeviceId(context: Context): String {
-        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
-
     private fun loadOrders() {
         viewModelScope.launch {
             try {
                 //val orderList = repository.getAllOrders()
-                val orderList = repository.getAllOrdersForManagement()
+                val orderList = repository.getAllOrdersByDeviceId(deviceId)
                 //Log.d("FirebaseTest", "Load orders: ${orderList.toString()}")
                 _orders.postValue(orderList)
             } catch (e: Exception) {
-                // Trate exceções, se necessário
                 e.printStackTrace()
             }
         }
@@ -42,10 +35,10 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
         viewModelScope.launch {
             try {
                 //Log.d("FirebaseTest", "Updating order: ${updatedOrder.toString()}")
+                updatedOrder.totalPrice = updatedOrder.calculateTotalPrice()
                 repository.updateOrder(updatedOrder)
                 loadOrders()
             } catch (e: Exception) {
-                // Trate exceções, se necessário
                 e.printStackTrace()
             }
         }

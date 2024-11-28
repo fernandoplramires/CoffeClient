@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -46,7 +45,11 @@ class OrderAdapter(
             )
 
             // Titulo do pedido
-            textViewOrderTitle.text = "${order.status} Pedido #${order.id}"
+            if (order.status.equals(OrderStatus.CARRINHO.toString())) {
+                textViewOrderTitle.text = "Pedido Atual"
+            } else {
+                textViewOrderTitle.text = "${order.status} Pedido #${order.id}"
+            }
 
             // Preencher os itens do pedido dinamicamente
             layoutOrderItems.removeAllViews() // Limpar itens antigos
@@ -75,32 +78,51 @@ class OrderAdapter(
                 textViewItemName.text = detail.productName
                 textViewItemQuantity.text = detail.quantity.toString().plus("x -")
 
-                // Configurar ações dos botões
+                // Botao para aumentar quantidade
                 buttonIncrease.setOnClickListener {
-                    // Lógica para aumentar quantidade
                     detail.quantity = detail.quantity?.plus(1)
                     textViewItemQuantity.text = detail.quantity.toString().plus("x -")
+
+                    // Atualiza o pedido e comunica o ViewModel
+                    order.totalPrice = order.calculateTotalPrice()
+                    onOrderSave(order)
                 }
 
+                // Botao para diminuir quantidade
                 buttonDecrease.setOnClickListener {
-                    // Lógica para diminuir quantidade
                     if (detail.quantity!! > 1) {
                         detail.quantity = detail.quantity!! - 1
                         textViewItemQuantity.text = detail.quantity.toString().plus("x -")
+
+                        // Atualiza o pedido e comunica o ViewModel
+                        order.totalPrice = order.calculateTotalPrice()
+                        onOrderSave(order) // Callback para recalcular e salvar
                     }
                 }
 
+                // Botao para remover um item
                 buttonRemove.setOnClickListener {
-                    // Lógica para remover item
                     order.details = order.details?.filter { it != detail }
+                    onOrderSave(order)
                     notifyDataSetChanged()
+                }
+
+                // Desabilita os botoes para itens que nao estao no carrinho
+                if (!order.status.equals(OrderStatus.CARRINHO.toString())) {
+                    buttonIncrease.visibility = View.GONE
+                    buttonDecrease.visibility = View.GONE
+                    buttonRemove.visibility = View.GONE
+                } else {
+                    buttonIncrease.visibility = View.VISIBLE
+                    buttonDecrease.visibility = View.VISIBLE
+                    buttonRemove.visibility = View.VISIBLE
                 }
 
                 layoutOrderItems.addView(itemLayout)
             }
 
             // Valor total
-            val precoFormatado = Convertions.formatToBrazilianCurrency(order.totalPrice?.toDouble() ?: 0.0)
+            val precoFormatado = Convertions.formatToBrazilianCurrency(order.calculateTotalPrice())
             textViewTotalPrice.text = "Valor Total: ${precoFormatado}"
 
             // Informações do cliente
@@ -110,35 +132,18 @@ class OrderAdapter(
             textViewComplement.text = order.complement ?: "Não informado"
             textViewNumber.text = order.number ?: "Não informado"
 
-            // Configuração inicial do Spinner
-            val statusAdapter = ArrayAdapter(
-                root.context,
-                android.R.layout.simple_spinner_item,
-                OrderStatus.values().filter { it.name != "CARRINHO" }.map { it.name }
-            )
-            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerOrderStatus.adapter = statusAdapter
-            val statusIndex = OrderStatus.values().indexOf(order.status ?: OrderStatus.NOVO)
-            spinnerOrderStatus.setSelection(statusIndex)
-            spinnerOrderStatus.isEnabled = false
-
             // Configuração inicial dos botões
             resetEditingState(this, holder.itemView.context)
 
-            // Lógica do botão "Editar"
-            buttonEditOrder.setOnClickListener {
-                enableEditingFields(this, holder.itemView.context)
-            }
-
             // Lógica do botão "Salvar"
-            buttonSaveOrder.setOnClickListener {
+            buttonCheckoutOrder.setOnClickListener {
                 val updatedOrder = order.copy(
                     email = textViewEmail.text.toString(),
                     phone = textViewPhone.text.toString(),
                     zipCode = textViewZipCode.text.toString(),
                     complement = textViewComplement.text.toString(),
                     number = textViewNumber.text.toString(),
-                    status = spinnerOrderStatus.selectedItem.toString()
+                    status = OrderStatus.NOVO.toString()
                 )
                 onOrderSave(updatedOrder)
                 resetEditingState(this, holder.itemView.context)
@@ -149,7 +154,6 @@ class OrderAdapter(
             textViewOrderTitle.setOnClickListener {
                 expandedOrderId = if (isExpanded) null else order.id
                 notifyDataSetChanged()
-                //WARNING
                 onOrderClick(order.id!!)
             }
         }
@@ -169,12 +173,9 @@ class OrderAdapter(
         binding.textViewZipCode.isEnabled = true
         binding.textViewComplement.isEnabled = true
         binding.textViewNumber.isEnabled = true
-        binding.spinnerOrderStatus.isEnabled = true
 
-        binding.buttonSaveOrder.isEnabled = true
-        binding.buttonSaveOrder.setTextColor(ContextCompat.getColor(context, R.color.black))
-        binding.buttonEditOrder.isEnabled = false
-        binding.buttonEditOrder.setTextColor(ContextCompat.getColor(context, R.color.light_gray))
+        binding.buttonCheckoutOrder.isEnabled = true
+        binding.buttonCheckoutOrder.setTextColor(ContextCompat.getColor(context, R.color.black))
     }
 
     private fun resetEditingState(binding: ItemOrderBinding, context: Context) {
@@ -183,13 +184,9 @@ class OrderAdapter(
         binding.textViewZipCode.isEnabled = false
         binding.textViewComplement.isEnabled = false
         binding.textViewNumber.isEnabled = false
-        binding.spinnerOrderStatus.isEnabled = false
 
-        binding.buttonSaveOrder.isEnabled = false
-        binding.buttonSaveOrder.setTextColor(ContextCompat.getColor(context, R.color.light_gray))
-
-        binding.buttonEditOrder.isEnabled = true
-        binding.buttonEditOrder.setTextColor(ContextCompat.getColor(context, R.color.black))
+        binding.buttonCheckoutOrder.isEnabled = false
+        binding.buttonCheckoutOrder.setTextColor(ContextCompat.getColor(context, R.color.light_gray))
     }
 
     inner class OrderViewHolder(val binding: ItemOrderBinding) : RecyclerView.ViewHolder(binding.root)

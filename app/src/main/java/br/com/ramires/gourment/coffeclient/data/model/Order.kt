@@ -12,9 +12,10 @@ enum class OrderStatus(val displayName: String) {
 
 data class OrderDetail(
     @PropertyName("productName") var productName: String? = null,
+    @PropertyName("productPrice") var productPrice: Double? = 0.00,
     @PropertyName("quantity") var quantity: Int? = null
 ) {
-    constructor() : this(null, null)
+    constructor() : this(null, null, null)
 }
 
 data class Order(
@@ -31,4 +32,9 @@ data class Order(
 ) {
     // Construtor vazio para o Firestore
     constructor() : this(null, null, null, null, null, null, null, null, null, null)
+
+    // Método para calcular o total baseado nos detalhes
+    fun calculateTotalPrice(): Double {
+        return details?.sumOf { (it.quantity ?: 0) * (it.productPrice ?: 0.0) } ?: 0.0
+    }
 }

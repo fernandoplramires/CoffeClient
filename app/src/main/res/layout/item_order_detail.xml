@@ -8,7 +8,7 @@
 
     <!-- Botão de Incremento -->
     <Button
-        android:visibility="invisible"
+        android:visibility="visible"
         android:id="@+id/buttonIncreaseQuantity"
         android:layout_width="20dp"
         android:layout_height="20dp"
@@ -21,7 +21,7 @@
 
     <!-- Botão de diminuir quantidade -->
     <Button
-        android:visibility="invisible"
+        android:visibility="visible"
         android:id="@+id/buttonDecreaseQuantity"
         android:layout_width="20dp"
         android:layout_height="20dp"
@@ -65,7 +65,7 @@
 
     <!-- Botão de remover item -->
     <Button
-        android:visibility="invisible"
+        android:visibility="visible"
         android:id="@+id/buttonRemoveItem"
         android:layout_width="26dp"
         android:layout_height="26dp"
