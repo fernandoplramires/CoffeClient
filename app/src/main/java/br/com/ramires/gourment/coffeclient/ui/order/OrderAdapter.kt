@@ -52,73 +52,85 @@ class OrderAdapter(
             }
 
             // Preencher os itens do pedido dinamicamente
-            layoutOrderItems.removeAllViews() // Limpar itens antigos
-            order.details?.forEachIndexed  { index, detail ->
-                val itemLayout = LayoutInflater.from(root.context)
-                    .inflate(R.layout.item_order_detail, layoutOrderItems, false)
+            layoutOrderItems.removeAllViews()
+            if (order.details.isNullOrEmpty()) {
+                // Se não houver itens no pedido, exibe uma mensagem ao usuário
+                val emptyMessageView = LayoutInflater.from(root.context)
+                    .inflate(R.layout.item_order_empty, layoutOrderItems, false)
 
-                val linearLayoutItemOrderDetail = itemLayout.findViewById<LinearLayout>(R.id.linearLayoutItemOrderDetail)
-                val textViewItemName = itemLayout.findViewById<TextView>(R.id.textViewItemName)
-                val textViewItemQuantity = itemLayout.findViewById<TextView>(R.id.textViewItemQuantity)
-                val buttonIncrease = itemLayout.findViewById<Button>(R.id.buttonIncreaseQuantity)
-                val buttonDecrease = itemLayout.findViewById<Button>(R.id.buttonDecreaseQuantity)
-                val buttonRemove = itemLayout.findViewById<Button>(R.id.buttonRemoveItem)
+                layoutOrderItems.addView(emptyMessageView)
+            } else {
+                order.details?.forEachIndexed { index, detail ->
+                    val itemLayout = LayoutInflater.from(root.context)
+                        .inflate(R.layout.item_order_detail, layoutOrderItems, false)
 
-                // Define uma cor alternada com base na posição
-                val backgroundColor = if (index  % 2 == 0) {
-                    ContextCompat.getColor(holder.itemView.context, R.color.color_odd)
-                } else {
-                    ContextCompat.getColor(holder.itemView.context, R.color.color_even)
-                }
+                    val linearLayoutItemOrderDetail =
+                        itemLayout.findViewById<LinearLayout>(R.id.linearLayoutItemOrderDetail)
+                    val textViewItemName = itemLayout.findViewById<TextView>(R.id.textViewItemName)
+                    val textViewItemQuantity =
+                        itemLayout.findViewById<TextView>(R.id.textViewItemQuantity)
+                    val buttonIncrease =
+                        itemLayout.findViewById<Button>(R.id.buttonIncreaseQuantity)
+                    val buttonDecrease =
+                        itemLayout.findViewById<Button>(R.id.buttonDecreaseQuantity)
+                    val buttonRemove = itemLayout.findViewById<Button>(R.id.buttonRemoveItem)
 
-                // Aplica a cor de fundo no layout principal do item
-                linearLayoutItemOrderDetail.setBackgroundColor(backgroundColor)
+                    // Define uma cor alternada com base na posição
+                    val backgroundColor = if (index % 2 == 0) {
+                        ContextCompat.getColor(holder.itemView.context, R.color.color_odd)
+                    } else {
+                        ContextCompat.getColor(holder.itemView.context, R.color.color_even)
+                    }
 
-                // Configurar nome e quantidade
-                textViewItemName.text = detail.productName
-                textViewItemQuantity.text = detail.quantity.toString().plus("x -")
+                    // Aplica a cor de fundo no layout principal do item
+                    linearLayoutItemOrderDetail.setBackgroundColor(backgroundColor)
 
-                // Botao para aumentar quantidade
-                buttonIncrease.setOnClickListener {
-                    detail.quantity = detail.quantity?.plus(1)
+                    // Configurar nome e quantidade
+                    textViewItemName.text = detail.productName
                     textViewItemQuantity.text = detail.quantity.toString().plus("x -")
 
-                    // Atualiza o pedido e comunica o ViewModel
-                    order.totalPrice = order.calculateTotalPrice()
-                    onOrderSave(order)
-                }
-
-                // Botao para diminuir quantidade
-                buttonDecrease.setOnClickListener {
-                    if (detail.quantity!! > 1) {
-                        detail.quantity = detail.quantity!! - 1
+                    // Botao para aumentar quantidade
+                    buttonIncrease.setOnClickListener {
+                        detail.quantity = detail.quantity?.plus(1)
                         textViewItemQuantity.text = detail.quantity.toString().plus("x -")
 
                         // Atualiza o pedido e comunica o ViewModel
                         order.totalPrice = order.calculateTotalPrice()
-                        onOrderSave(order) // Callback para recalcular e salvar
+                        onOrderSave(order)
                     }
-                }
 
-                // Botao para remover um item
-                buttonRemove.setOnClickListener {
-                    order.details = order.details?.filter { it != detail }
-                    onOrderSave(order)
-                    notifyDataSetChanged()
-                }
+                    // Botao para diminuir quantidade
+                    buttonDecrease.setOnClickListener {
+                        if (detail.quantity!! > 1) {
+                            detail.quantity = detail.quantity!! - 1
+                            textViewItemQuantity.text = detail.quantity.toString().plus("x -")
 
-                // Desabilita os botoes para itens que nao estao no carrinho
-                if (!order.status.equals(OrderStatus.CARRINHO.toString())) {
-                    buttonIncrease.visibility = View.GONE
-                    buttonDecrease.visibility = View.GONE
-                    buttonRemove.visibility = View.GONE
-                } else {
-                    buttonIncrease.visibility = View.VISIBLE
-                    buttonDecrease.visibility = View.VISIBLE
-                    buttonRemove.visibility = View.VISIBLE
-                }
+                            // Atualiza o pedido e comunica o ViewModel
+                            order.totalPrice = order.calculateTotalPrice()
+                            onOrderSave(order) // Callback para recalcular e salvar
+                        }
+                    }
 
-                layoutOrderItems.addView(itemLayout)
+                    // Botao para remover um item
+                    buttonRemove.setOnClickListener {
+                        order.details = order.details?.filter { it != detail }
+                        onOrderSave(order)
+                        notifyDataSetChanged()
+                    }
+
+                    // Desabilita os botoes para itens que nao estao no carrinho
+                    if (!order.status.equals(OrderStatus.CARRINHO.toString())) {
+                        buttonIncrease.visibility = View.GONE
+                        buttonDecrease.visibility = View.GONE
+                        buttonRemove.visibility = View.GONE
+                    } else {
+                        buttonIncrease.visibility = View.VISIBLE
+                        buttonDecrease.visibility = View.VISIBLE
+                        buttonRemove.visibility = View.VISIBLE
+                    }
+
+                    layoutOrderItems.addView(itemLayout)
+                }
             }
 
             // Valor total
