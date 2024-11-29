@@ -1,7 +1,6 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,8 +23,6 @@ class OrdersFragment(private val repository: OrderRepositoryInterface) : Fragmen
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        deviceId = Settings.Secure.getString(context?.contentResolver, Settings.Secure.ANDROID_ID)
-
         _binding = FragmentOrdersBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,7 +30,7 @@ class OrdersFragment(private val repository: OrderRepositoryInterface) : Fragmen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val factory = OrderViewModelFactory(repository, deviceId)
+        val factory = OrderViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory).get(OrderViewModel::class.java)
 
         setupRecyclerView()
@@ -59,6 +56,11 @@ class OrdersFragment(private val repository: OrderRepositoryInterface) : Fragmen
         viewModel.orders.observe(viewLifecycleOwner) { orders ->
             adapter.submitList(orders)
             adapter.notifyDataSetChanged()
+
+            // Expande automaticamente o primeiro pedido apenas ao carregar a lista
+            if (orders.isNotEmpty() && adapter.getExpandedOrderId() == null) {
+                adapter.setExpandedOrder(orders.firstOrNull()?.id)
+            }
         }
     }
 

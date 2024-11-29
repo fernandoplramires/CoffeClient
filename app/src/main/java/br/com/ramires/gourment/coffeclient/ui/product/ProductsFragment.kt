@@ -65,6 +65,7 @@ class ProductsFragment(
                 binding.textViewEmptyState.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(products)
+                adapter.notifyDataSetChanged()
             }
         }
 

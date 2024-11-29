@@ -3,9 +3,10 @@ package br.com.ramires.gourment.coffeclient.data.repository.order
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import br.com.ramires.gourment.coffeclient.data.model.Order
+import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import kotlinx.coroutines.tasks.await
 
-class FirebaseOrderRepository : OrderRepositoryInterface {
+class FirebaseOrderRepository(private val deviceId: String) : OrderRepositoryInterface {
 
     private val db = FirebaseFirestore.getInstance()
     private val ordersCollection = db.collection("orders")
@@ -21,26 +22,6 @@ class FirebaseOrderRepository : OrderRepositoryInterface {
     }
 
     override suspend fun getAllOrders(): List<Order> {
-        return try {
-            val snapshot = ordersCollection.get().await()
-            snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
-        } catch (e: Exception) {
-            Log.e("FirebaseOrderRepository", "Error fetching orders", e)
-            emptyList()
-        }
-    }
-
-    override suspend fun getAllOrdersForManagement(): List<Order> {
-        return try {
-            val snapshot = ordersCollection.whereNotEqualTo("status","CARRINHO").get().await()
-            snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
-        } catch (e: Exception) {
-            Log.e("FirebaseOrderRepository", "Error fetching orders", e)
-            emptyList()
-        }
-    }
-
-    override suspend fun getAllOrdersByDeviceId(deviceId: String): List<Order> {
         return try {
             val snapshot = ordersCollection.whereEqualTo("deviceId", deviceId).get().await()
             snapshot.documents.mapNotNull { it.toObject(Order::class.java) }
@@ -60,8 +41,13 @@ class FirebaseOrderRepository : OrderRepositoryInterface {
         }
     }
 
-    override suspend fun createOrder(status: String): Order {
-        val newOrder = Order(id = getNextProductId(), status = status, details = mutableListOf())
+    override suspend fun createOrder(): Order {
+        val newOrder = Order(
+            id = getNextProductId(),
+            deviceId = deviceId,
+            status = OrderStatus.CARRINHO.toString(),
+            details = mutableListOf()
+        )
         try {
             addOrder(newOrder)
         } catch (e: Exception) {
@@ -108,4 +94,3 @@ class FirebaseOrderRepository : OrderRepositoryInterface {
         }
     }
 }
-

@@ -3,6 +3,7 @@ package br.com.ramires.gourment.coffeclient
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import br.com.ramires.gourment.coffeclient.data.repository.order.FirebaseOrderRepository
@@ -37,8 +38,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val repositoryType = intent.getStringExtra("REPOSITORY_TYPE")
-        initializeRepositories(repositoryType)
+        initializeRepositories(repositoryType, deviceId)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -49,13 +51,13 @@ class MainActivity : AppCompatActivity() {
         replaceFragment(ProductsFragment(productRepository!!, orderRepository!!))
     }
 
-    private fun initializeRepositories(repositoryType: String?) {
+    private fun initializeRepositories(repositoryType: String?, deviceId: String) {
         if (repositoryType == "MOCK") {
             productRepository = MockProductRepository()
-            orderRepository = MockOrderRepository()
+            orderRepository = MockOrderRepository(deviceId)
         } else {
             productRepository = FirebaseProductRepository()
-            orderRepository = FirebaseOrderRepository()
+            orderRepository = FirebaseOrderRepository(deviceId)
         }
     }
 

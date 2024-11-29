@@ -67,8 +67,10 @@ class ProductAdapter(private val onAction: (ActionType, Product) -> Unit) : Recy
                 binding.imageViewProduct.setImageResource(R.drawable.ic_placeholder)
             }
 
-            // Verifica se o produto está selecionado para alternar a borda
+            // Verifica se o produto está selecionado
             val isSelected = selectedProducts.contains(product.id)
+
+            // Define a borda com base no estado de seleção
             val borderDrawable = if (isSelected) R.drawable.item_shadow_border_red else R.drawable.item_shadow_border
             binding.productContainer.setBackgroundResource(borderDrawable)
 
@@ -77,8 +79,6 @@ class ProductAdapter(private val onAction: (ActionType, Product) -> Unit) : Recy
                     selectedProducts.remove(product.id)
                     onAction(ActionType.REMOVE, product)
                 } else {
-                    //TODO
-                    //selectedProducts.add(product.id!!)
                     product.id?.let { selectedProducts.add(it) }
                     onAction(ActionType.SAVE, product)
                 }
@@ -87,5 +87,3 @@ class ProductAdapter(private val onAction: (ActionType, Product) -> Unit) : Recy
         }
     }
 }
-
-

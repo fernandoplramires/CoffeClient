@@ -40,7 +40,10 @@ class ProductViewModel(
     fun loadCartOrder() {
         viewModelScope.launch {
             try {
-                val order = ordersRepository.getOrderByStatus("CARRINHO")
+                var order = ordersRepository.getOrderByStatus("CARRINHO")
+                if (order == null) {
+                    order = ordersRepository.createOrder()
+                }
                 _cartOrder.postValue(order)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -52,13 +55,22 @@ class ProductViewModel(
     fun addProductToCart(product: Product) {
         viewModelScope.launch {
             try {
-                val order = ordersRepository.getOrderByStatus("CARRINHO") ?: ordersRepository.createOrder("CARRINHO")
+                val order = ordersRepository.getOrderByStatus("CARRINHO") ?: ordersRepository.createOrder()
                 val updatedDetails = order.details.orEmpty().toMutableList()
 
                 // Adiciona o produto ao carrinho com quantidade 1
-                updatedDetails.add(OrderDetail(product.id, product.name, product.price, 1))
+                val existingDetail = updatedDetails.find { it.id == product.id }
+                if (existingDetail != null) {
+                    existingDetail.quantity = (existingDetail.quantity ?: 0) + 1
+                } else {
+                    updatedDetails.add(OrderDetail(product.id, product.name, product.price, 1))
+                }
+
                 order.details = updatedDetails
                 ordersRepository.updateOrder(order)
+
+                // Atualiza o estado do carrinho
+                _cartOrder.postValue(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -75,6 +87,9 @@ class ProductViewModel(
                 updatedDetails.removeIf { it.id == product.id }
                 order.details = updatedDetails
                 ordersRepository.updateOrder(order)
+
+                // Atualiza o estado do carrinho
+                _cartOrder.postValue(order)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

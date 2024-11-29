@@ -48,7 +48,7 @@ class OrderAdapter(
             if (order.status.equals(OrderStatus.CARRINHO.toString())) {
                 textViewOrderTitle.text = "Pedido Atual"
             } else {
-                textViewOrderTitle.text = "${order.status} Pedido #${order.id}"
+                textViewOrderTitle.text = "Pedido #${order.id}"
             }
 
             // Preencher os itens do pedido dinamicamente
@@ -157,6 +157,15 @@ class OrderAdapter(
                 onOrderClick(order.id!!)
             }
         }
+    }
+
+    fun getExpandedOrderId(): Int? {
+        return expandedOrderId
+    }
+
+    fun setExpandedOrder(orderId: Int?) {
+        expandedOrderId = orderId
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int = orders.size
