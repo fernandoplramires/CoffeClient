@@ -1,5 +1,6 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,14 +23,18 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
         viewModelScope.launch {
             try {
                 val orderList = repository.getAllOrders().toMutableList()
+                Log.d("OrderViewModel", "repository.getAllOrders().toMutableList(): $orderList")
 
                 // Verifica se há um pedido com status "CARRINHO"
                 val cartOrder = orderList.find { it.status == OrderStatus.CARRINHO.toString() }
                 if (cartOrder == null) {
+
                     // Adiciona o novo pedido no topo
                     val newCartOrder = repository.createOrder()
                     orderList.add(0, newCartOrder)
+                    Log.d("OrderViewModel", "repository.createOrder(): $newCartOrder")
                 }
+                Log.d("OrderViewModel", "orderList.find { it.status == OrderStatus.CARRINHO.toString() }: $cartOrder")
 
                 // Ordena e atualiza a lista
                 val sortedOrders = orderList.sortedByDescending { it.status == OrderStatus.CARRINHO.toString() }
