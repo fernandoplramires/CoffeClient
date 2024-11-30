@@ -9,7 +9,9 @@ import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import br.com.ramires.gourment.coffeclient.data.repository.order.OrderRepositoryInterface
 import br.com.ramires.gourment.coffeclient.util.Validates
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewModel() {
 
@@ -29,49 +31,32 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
         loadOrders()
     }
 
-    fun loadOrders(): Int? {
+    fun loadOrders(onOrdersUpdated: (() -> Unit)? = null): Int? {
         var newCartOrderId: Int? = null
         viewModelScope.launch {
             try {
                 val orderList = repository.getAllOrders().toMutableList()
-                Log.d("OrderViewModel", "repository.getAllOrders().toMutableList(): $orderList")
 
-                // Verifica se há um pedido com status "CARRINHO"
                 val cartOrder = orderList.find { it.status == OrderStatus.CARRINHO.toString() }
                 if (cartOrder == null) {
-
-                    // Adiciona o novo pedido
                     val newCartOrder = repository.createOrder()
                     newCartOrderId = newCartOrder.id
                     orderList.add(newCartOrder)
-                    Log.d("OrderViewModel", "repository.createOrder(): $newCartOrder")
                 }
-                Log.d("OrderViewModel", "orderList.find { it.status == OrderStatus.CARRINHO.toString() }: $cartOrder")
 
-                // Ordena os pedidos: status "CARRINHO" primeiro e depois por ID em ordem decrescente
                 val sortedOrders = orderList.sortedWith(
                     compareByDescending<Order> { it.status == OrderStatus.CARRINHO.toString() }
                         .thenByDescending { it.id }
                 )
 
-                // Atualiza a lista
                 _orders.postValue(sortedOrders)
+                // Notifica que os pedidos foram atualizados
+                onOrdersUpdated?.invoke()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
         return newCartOrderId
-    }
-
-    fun validateOrder(order: Order): String? {
-        return when {
-            !Validates.isEmail(order.email) -> "E-mail inválido"
-            order.phone.isNullOrEmpty() -> "Telefone deve ser preenchido"
-            !Validates.isCep(order.zipCode) -> "CEP inválido"
-            order.complement.isNullOrEmpty() -> "Complemento deve ser preenchido"
-            order.number.isNullOrEmpty() -> "Número deve ser preenchido"
-            else -> null
-        }
     }
 
     fun updateOrder(updatedOrder: Order) {

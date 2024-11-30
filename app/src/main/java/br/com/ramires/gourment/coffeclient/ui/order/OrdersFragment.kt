@@ -43,12 +43,10 @@ class OrdersFragment(private val repository: OrderRepositoryInterface) : Fragmen
         binding.recyclerViewOrders.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = OrderAdapter(
-            onOrderClick = { orderid -> viewModel.expandOrder(orderid) }
+            onOrderClick = { orderId -> viewModel.expandOrder(orderId) }
         ) { updatedOrder, onOrderSaved ->
             viewModel.updateOrder(updatedOrder)
-            val newCartOrderId = viewModel.loadOrders()
-            newCartOrderId?.let {
-                adapter.setExpandedOrder(it) // Expande o pedido recém-criado
+            viewModel.loadOrders {
                 onOrderSaved()
             }
         }
@@ -74,13 +72,6 @@ class OrdersFragment(private val repository: OrderRepositoryInterface) : Fragmen
         viewModel.orders.observe(viewLifecycleOwner) { orders ->
             adapter.submitList(orders)
             adapter.notifyDataSetChanged()
-
-            /*
-            // Expande automaticamente o primeiro pedido apenas ao carregar a lista
-            if (orders.isNotEmpty() && adapter.getExpandedOrderId() == null) {
-                adapter.setExpandedOrder(orders.firstOrNull()?.id)
-            }
-            */
 
             // Expande automaticamente o pedido com status CARRINHO
             val cartOrderId = orders.find { it.status == OrderStatus.CARRINHO.toString() }?.id

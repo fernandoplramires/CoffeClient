@@ -1,6 +1,8 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
+import android.app.Activity
 import android.text.Editable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +10,9 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import br.com.ramires.gourment.coffeclient.R
 import br.com.ramires.gourment.coffeclient.data.model.Order
@@ -225,17 +229,15 @@ class OrderAdapter(
                         status = OrderStatus.NOVO.toString()
                     )
 
-                    // Chamar onOrderSave e expandir o novo pedido
+                    // Atualiza o pedido e sincroniza a exibição do alerta
                     onOrderSave(updatedOrder) {
-                        Toast.makeText(root.context, "Pedido #${updatedOrder.id} gerado", Toast.LENGTH_SHORT).show()
-
-                        // Atualizar e expandir o novo pedido
-                        //setExpandedOrder(updatedOrder.id)
-                        expandedOrderId = updatedOrder.id
-                        val position = holder.bindingAdapterPosition
-                        if (position != RecyclerView.NO_POSITION) {
-                            notifyItemChanged(position)
-                        }                    }
+                        // Exibe o `AlertDialog` após atualizar os pedidos
+                        AlertDialog.Builder(root.context)
+                            .setTitle("AVISO")
+                            .setMessage("Pedido #${updatedOrder.id} foi gerado com sucesso!")
+                            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    }
                 }
             }
 
@@ -260,9 +262,12 @@ class OrderAdapter(
     override fun getItemCount(): Int = orders.size
 
     fun submitList(newOrders: List<Order>) {
+        val diffCallback = OrderDiffCallback(orders, newOrders)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
         orders.clear()
         orders.addAll(newOrders)
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     private fun enableOrDisableEditingFields(isEditable: Boolean, binding: ItemOrderBinding) {
@@ -286,4 +291,21 @@ class OrderAdapter(
     }
 
     inner class OrderViewHolder(val binding: ItemOrderBinding) : RecyclerView.ViewHolder(binding.root)
+}
+
+class OrderDiffCallback(
+    private val oldList: List<Order>,
+    private val newList: List<Order>
+) : DiffUtil.Callback() {
+
+    override fun getOldListSize() = oldList.size
+    override fun getNewListSize() = newList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return oldList[oldItemPosition].id == newList[newItemPosition].id
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return oldList[oldItemPosition] == newList[newItemPosition]
+    }
 }
