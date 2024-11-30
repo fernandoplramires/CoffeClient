@@ -6,10 +6,10 @@ import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 
 class MockOrderRepository(private val deviceId: String) : OrderRepositoryInterface {
 
-    private var currentMaxId = 0
+    private var currentMaxId = 2
     private val orders = mutableListOf<Order>(
         Order(
-            391,
+            2,
             "946fcb4057657c1aXXX",
             listOf(
                 OrderDetail(
@@ -34,7 +34,7 @@ class MockOrderRepository(private val deviceId: String) : OrderRepositoryInterfa
             OrderStatus.CARRINHO.toString()
         ),
         Order(
-            2,
+            1,
             "946fcb4057657c1a",
             listOf(
                 OrderDetail(

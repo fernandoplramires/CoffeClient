@@ -1,6 +1,6 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
-import android.content.Context
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,10 +15,13 @@ import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import br.com.ramires.gourment.coffeclient.databinding.ItemOrderBinding
 import br.com.ramires.gourment.coffeclient.util.Convertions
+import br.com.ramires.gourment.coffeclient.util.Helpers
+import br.com.ramires.gourment.coffeclient.util.Masks
+import br.com.ramires.gourment.coffeclient.util.Validates
 
 class OrderAdapter(
     private val onOrderClick: (Int) -> Unit,
-    private val onOrderSave: (Order) -> Unit
+    private val onOrderSave: (Order, () -> Unit) -> Unit
 ) : RecyclerView.Adapter<OrderAdapter.OrderViewHolder>() {
 
     private val orders = mutableListOf<Order>()
@@ -45,11 +48,9 @@ class OrderAdapter(
             )
 
             // Titulo do pedido
-            if (order.status.equals(OrderStatus.CARRINHO.toString())) {
-                textViewOrderTitle.text = "Pedido Atual"
-            } else {
-                textViewOrderTitle.text = "Pedido #${order.id}"
-            }
+            textViewOrderTitle.text =
+                if (order.status == OrderStatus.CARRINHO.toString()) "Pedido Atual"
+                else "Pedido #${order.id}"
 
             // Preencher os itens do pedido dinamicamente
             layoutOrderItems.removeAllViews()
@@ -96,7 +97,12 @@ class OrderAdapter(
 
                         // Atualiza o pedido e comunica o ViewModel
                         order.totalPrice = order.calculateTotalPrice()
-                        onOrderSave(order)
+                        onOrderSave(order) {
+                            val position = holder.bindingAdapterPosition
+                            if (position != RecyclerView.NO_POSITION) {
+                                notifyItemChanged(position)
+                            }
+                        }
                     }
 
                     // Botao para diminuir quantidade
@@ -107,14 +113,24 @@ class OrderAdapter(
 
                             // Atualiza o pedido e comunica o ViewModel
                             order.totalPrice = order.calculateTotalPrice()
-                            onOrderSave(order) // Callback para recalcular e salvar
+                            onOrderSave(order) {
+                                val position = holder.bindingAdapterPosition
+                                if (position != RecyclerView.NO_POSITION) {
+                                    notifyItemChanged(position)
+                                }
+                            }
                         }
                     }
 
                     // Botao para remover um item
                     buttonRemove.setOnClickListener {
                         order.details = order.details?.filter { it != detail }
-                        onOrderSave(order)
+                        onOrderSave(order) {
+                            val position = holder.bindingAdapterPosition
+                            if (position != RecyclerView.NO_POSITION) {
+                                notifyItemChanged(position)
+                            }
+                        }
                         notifyDataSetChanged()
                     }
 
@@ -137,29 +153,90 @@ class OrderAdapter(
             val precoFormatado = Convertions.formatToBrazilianCurrency(order.calculateTotalPrice())
             textViewTotalPrice.text = "Valor Total: ${precoFormatado}"
 
+            // Habilita ou desabilita campos de edição com base no status
+            val isEditable = order.status == OrderStatus.CARRINHO.toString()
+
             // Informações do cliente
-            textViewEmail.text = order.email ?: "Não informado"
-            textViewPhone.text = order.phone ?: "Não informado"
-            textViewZipCode.text = order.zipCode ?: "Não informado"
-            textViewComplement.text = order.complement ?: "Não informado"
-            textViewNumber.text = order.number ?: "Não informado"
+            textViewEmail.text = Editable.Factory.getInstance().newEditable(order.email ?: "")
+            textViewPhone.text = Editable.Factory.getInstance().newEditable(order.phone ?: "")
+            textViewZipCode.text = Editable.Factory.getInstance().newEditable(order.zipCode ?: "")
+            textViewComplement.text = Editable.Factory.getInstance().newEditable(order.complement ?: "")
+            textViewNumber.text = Editable.Factory.getInstance().newEditable(order.number ?: "")
 
-            // Configuração inicial dos botões
-            resetEditingState(this, holder.itemView.context)
+            // Mascaras aplicadas em CEP e Telefone
+            Masks.applyCepMask(textViewZipCode)
+            Masks.applyPhoneMask(textViewPhone)
 
-            // Lógica do botão "Salvar"
+            // Configura habilitação dos campos
+            enableOrDisableEditingFields(isEditable, this)
+
+            //Botao de Finalizar Pedido
             buttonCheckoutOrder.setOnClickListener {
-                val updatedOrder = order.copy(
-                    email = textViewEmail.text.toString(),
-                    phone = textViewPhone.text.toString(),
-                    zipCode = textViewZipCode.text.toString(),
-                    complement = textViewComplement.text.toString(),
-                    number = textViewNumber.text.toString(),
-                    status = OrderStatus.NOVO.toString()
-                )
-                onOrderSave(updatedOrder)
-                resetEditingState(this, holder.itemView.context)
-                Toast.makeText(root.context, "Pedido alterado com sucesso!", Toast.LENGTH_SHORT).show()
+                // Oculta o teclado antes de executar qualquer ação
+                Helpers.hideKeyboard(it)
+
+                // Validações utilizando a classe `Validates`
+                val emailError = when {
+                    textViewEmail.text.isNullOrBlank() -> "O campo E-mail é obrigatório."
+                    !Validates.isEmail(textViewEmail.text.toString()) -> "Formato de E-mail inválido."
+                    else -> null
+                }
+
+                val phoneError = when {
+                    textViewPhone.text.isNullOrBlank() -> "O campo Telefone é obrigatório."
+                    !Validates.isPhone(textViewPhone.text.toString()) -> "Formato de Telefone inválido."
+                    else -> null
+                }
+
+                val zipCodeError = when {
+                    textViewZipCode.text.isNullOrBlank() -> "O campo CEP é obrigatório."
+                    !Validates.isCep(textViewZipCode.text.toString()) -> "Formato de CEP inválido. Ex: 12345-678."
+                    !Validates.isValidZipCode(textViewZipCode.text.toString()) -> "CEP fora do raio de cobertura."
+                    else -> null
+                }
+
+                val complementError = if (textViewComplement.text.isNullOrBlank()) "O campo Complemento é obrigatório." else null
+                val numberError = if (textViewNumber.text.isNullOrBlank()) "O campo Número é obrigatório." else null
+
+                // Exibir erros nos campos correspondentes
+                textViewEmailError.text = emailError
+                textViewEmailError.visibility = if (emailError != null) View.VISIBLE else View.GONE
+
+                textViewPhoneError.text = phoneError
+                textViewPhoneError.visibility = if (phoneError != null) View.VISIBLE else View.GONE
+
+                textViewZipCodeError.text = zipCodeError
+                textViewZipCodeError.visibility = if (zipCodeError != null) View.VISIBLE else View.GONE
+
+                textViewComplementError.text = complementError
+                textViewComplementError.visibility = if (complementError != null) View.VISIBLE else View.GONE
+
+                textViewNumberError.text = numberError
+                textViewNumberError.visibility = if (numberError != null) View.VISIBLE else View.GONE
+
+                // Verifica se todos os campos estão válidos
+                if (emailError == null && phoneError == null && zipCodeError == null && complementError == null && numberError == null) {
+                    val updatedOrder = order.copy(
+                        email = textViewEmail.text.toString(),
+                        phone = textViewPhone.text.toString(),
+                        zipCode = textViewZipCode.text.toString(),
+                        complement = textViewComplement.text.toString(),
+                        number = textViewNumber.text.toString(),
+                        status = OrderStatus.NOVO.toString()
+                    )
+
+                    // Chamar onOrderSave e expandir o novo pedido
+                    onOrderSave(updatedOrder) {
+                        Toast.makeText(root.context, "Pedido #${updatedOrder.id} gerado", Toast.LENGTH_SHORT).show()
+
+                        // Atualizar e expandir o novo pedido
+                        //setExpandedOrder(updatedOrder.id)
+                        expandedOrderId = updatedOrder.id
+                        val position = holder.bindingAdapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            notifyItemChanged(position)
+                        }                    }
+                }
             }
 
             // Expande ou colapsa ao clicar no título
@@ -188,26 +265,24 @@ class OrderAdapter(
         notifyDataSetChanged()
     }
 
-    private fun enableEditingFields(binding: ItemOrderBinding, context: Context) {
-        binding.textViewEmail.isEnabled = true
-        binding.textViewPhone.isEnabled = true
-        binding.textViewZipCode.isEnabled = true
-        binding.textViewComplement.isEnabled = true
-        binding.textViewNumber.isEnabled = true
+    private fun enableOrDisableEditingFields(isEditable: Boolean, binding: ItemOrderBinding) {
+        binding.textViewEmail.isFocusableInTouchMode = isEditable
+        binding.textViewPhone.isFocusableInTouchMode = isEditable
+        binding.textViewZipCode.isFocusableInTouchMode = isEditable
+        binding.textViewComplement.isFocusableInTouchMode = isEditable
+        binding.textViewNumber.isFocusableInTouchMode = isEditable
 
-        binding.buttonCheckoutOrder.isEnabled = true
-        binding.buttonCheckoutOrder.setTextColor(ContextCompat.getColor(context, R.color.black))
-    }
+        binding.textViewEmail.isEnabled = isEditable
+        binding.textViewPhone.isEnabled = isEditable
+        binding.textViewZipCode.isEnabled = isEditable
+        binding.textViewComplement.isEnabled = isEditable
+        binding.textViewNumber.isEnabled = isEditable
 
-    private fun resetEditingState(binding: ItemOrderBinding, context: Context) {
-        binding.textViewEmail.isEnabled = false
-        binding.textViewPhone.isEnabled = false
-        binding.textViewZipCode.isEnabled = false
-        binding.textViewComplement.isEnabled = false
-        binding.textViewNumber.isEnabled = false
-
-        binding.buttonCheckoutOrder.isEnabled = false
-        binding.buttonCheckoutOrder.setTextColor(ContextCompat.getColor(context, R.color.light_gray))
+        binding.buttonCheckoutOrder.isEnabled = isEditable
+        binding.buttonCheckoutOrder.setTextColor(
+            if (isEditable) ContextCompat.getColor(binding.root.context, R.color.black)
+            else ContextCompat.getColor(binding.root.context, R.color.light_gray)
+        )
     }
 
     inner class OrderViewHolder(val binding: ItemOrderBinding) : RecyclerView.ViewHolder(binding.root)

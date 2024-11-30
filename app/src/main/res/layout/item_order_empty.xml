@@ -10,7 +10,7 @@
         android:id="@+id/textViewEmptyOrderMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nenhum produto adicionado ao pedido =("
+        android:text="Sem produto(s) escolhido(s)"
         android:textSize="14sp"
         android:textColor="@android:color/darker_gray"
         android:gravity="center"
