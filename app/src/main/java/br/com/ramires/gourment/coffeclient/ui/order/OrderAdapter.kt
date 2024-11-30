@@ -1,6 +1,5 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
-import android.app.Activity
 import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -19,9 +17,14 @@ import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import br.com.ramires.gourment.coffeclient.databinding.ItemOrderBinding
 import br.com.ramires.gourment.coffeclient.util.Convertions
+import br.com.ramires.gourment.coffeclient.util.GeoUtils
 import br.com.ramires.gourment.coffeclient.util.Helpers
 import br.com.ramires.gourment.coffeclient.util.Masks
 import br.com.ramires.gourment.coffeclient.util.Validates
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OrderAdapter(
     private val onOrderClick: (Int) -> Unit,
@@ -179,7 +182,10 @@ class OrderAdapter(
                 // Oculta o teclado antes de executar qualquer ação
                 Helpers.hideKeyboard(it)
 
-                // Validações utilizando a classe `Validates`
+                // Inicializando erros
+                var zipCodeError: String? = null
+
+                // Executando validações básicas
                 val emailError = when {
                     textViewEmail.text.isNullOrBlank() -> "O campo E-mail é obrigatório."
                     !Validates.isEmail(textViewEmail.text.toString()) -> "Formato de E-mail inválido."
@@ -192,51 +198,59 @@ class OrderAdapter(
                     else -> null
                 }
 
-                val zipCodeError = when {
-                    textViewZipCode.text.isNullOrBlank() -> "O campo CEP é obrigatório."
-                    !Validates.isCep(textViewZipCode.text.toString()) -> "Formato de CEP inválido. Ex: 12345-678."
-                    !Validates.isValidZipCode(textViewZipCode.text.toString()) -> "CEP fora do raio de cobertura."
-                    else -> null
-                }
-
                 val complementError = if (textViewComplement.text.isNullOrBlank()) "O campo Complemento é obrigatório." else null
                 val numberError = if (textViewNumber.text.isNullOrBlank()) "O campo Número é obrigatório." else null
 
-                // Exibir erros nos campos correspondentes
-                textViewEmailError.text = emailError
-                textViewEmailError.visibility = if (emailError != null) View.VISIBLE else View.GONE
+                // Iniciando validação do CEP
+                CoroutineScope(Dispatchers.Main).launch {
+                    zipCodeError = when {
+                        textViewZipCode.text.isNullOrBlank() -> "O campo CEP é obrigatório."
+                        !Validates.isCep(textViewZipCode.text.toString()) -> "Formato de CEP inválido. Ex: 12345-678."
+                        else -> {
+                            val isValidZipCode = withContext(Dispatchers.IO) {
+                                GeoUtils.isWithinRadiusUsingApi(textViewZipCode.text.toString())
+                            }
+                            if (!isValidZipCode) "CEP fora do raio de cobertura." else null
+                        }
+                    }
 
-                textViewPhoneError.text = phoneError
-                textViewPhoneError.visibility = if (phoneError != null) View.VISIBLE else View.GONE
+                    // Atualiza os campos de erro após a validação assíncrona do CEP
+                    textViewZipCodeError.text = zipCodeError
+                    textViewZipCodeError.visibility = if (zipCodeError != null) View.VISIBLE else View.GONE
 
-                textViewZipCodeError.text = zipCodeError
-                textViewZipCodeError.visibility = if (zipCodeError != null) View.VISIBLE else View.GONE
+                    // Exibir erros dos outros campos
+                    textViewEmailError.text = emailError
+                    textViewEmailError.visibility = if (emailError != null) View.VISIBLE else View.GONE
 
-                textViewComplementError.text = complementError
-                textViewComplementError.visibility = if (complementError != null) View.VISIBLE else View.GONE
+                    textViewPhoneError.text = phoneError
+                    textViewPhoneError.visibility = if (phoneError != null) View.VISIBLE else View.GONE
 
-                textViewNumberError.text = numberError
-                textViewNumberError.visibility = if (numberError != null) View.VISIBLE else View.GONE
+                    textViewComplementError.text = complementError
+                    textViewComplementError.visibility = if (complementError != null) View.VISIBLE else View.GONE
 
-                // Verifica se todos os campos estão válidos
-                if (emailError == null && phoneError == null && zipCodeError == null && complementError == null && numberError == null) {
-                    val updatedOrder = order.copy(
-                        email = textViewEmail.text.toString(),
-                        phone = textViewPhone.text.toString(),
-                        zipCode = textViewZipCode.text.toString(),
-                        complement = textViewComplement.text.toString(),
-                        number = textViewNumber.text.toString(),
-                        status = OrderStatus.NOVO.toString()
-                    )
+                    textViewNumberError.text = numberError
+                    textViewNumberError.visibility = if (numberError != null) View.VISIBLE else View.GONE
 
-                    // Atualiza o pedido e sincroniza a exibição do alerta
-                    onOrderSave(updatedOrder) {
-                        // Exibe o `AlertDialog` após atualizar os pedidos
-                        AlertDialog.Builder(root.context)
-                            .setTitle("AVISO")
-                            .setMessage("Pedido #${updatedOrder.id} foi gerado com sucesso!")
-                            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                            .show()
+                    // Verifica se todos os campos estão válidos
+                    if (emailError == null && phoneError == null && zipCodeError == null && complementError == null && numberError == null) {
+                        val updatedOrder = order.copy(
+                            email = textViewEmail.text.toString(),
+                            phone = textViewPhone.text.toString(),
+                            zipCode = textViewZipCode.text.toString(),
+                            complement = textViewComplement.text.toString(),
+                            number = textViewNumber.text.toString(),
+                            status = OrderStatus.NOVO.toString()
+                        )
+
+                        // Atualiza o pedido e sincroniza a exibição do alerta
+                        onOrderSave(updatedOrder) {
+                            // Exibe o `AlertDialog` após atualizar os pedidos
+                            AlertDialog.Builder(root.context)
+                                .setTitle("AVISO")
+                                .setMessage("Pedido #${updatedOrder.id} foi gerado com sucesso!")
+                                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                                .show()
+                        }
                     }
                 }
             }

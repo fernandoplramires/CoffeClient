@@ -19,10 +19,4 @@ object Validates {
         val regex = Regex("^\\(\\d{2}\\) \\d{4,5}-\\d{4}$")
         return phone != null && regex.matches(phone)
     }
-
-    fun isValidZipCode(zipCode: String): Boolean {
-        // Valida se o cep esta dentro do raio de cobertura definido
-        // TODO integração com serviço de validação de CEP
-        return zipCode.length == 9 // Exemplo: "12345-678"
-    }
 }
