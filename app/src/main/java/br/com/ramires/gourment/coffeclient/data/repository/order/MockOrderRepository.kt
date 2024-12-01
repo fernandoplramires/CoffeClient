@@ -4,81 +4,73 @@ import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderDetail
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 
-class MockOrderRepository : OrderRepositoryInterface {
+class MockOrderRepository(private val deviceId: String) : OrderRepositoryInterface {
 
-    private var currentMaxId = 0
+    private var currentMaxId = 2
     private val orders = mutableListOf<Order>(
         Order(
-            391,
-            "946fcb4057657c1a",
+            2,
+            "946fcb4057657c1aXXX",
             listOf(
                 OrderDetail(
+                    1,
                     "Cookie Cake Red Velvet Oreo 300g",
+                    35.5,
                     1
                 ),
                 OrderDetail(
-                    "Cookie Cake Nutella 300g",
-                    2
-                ),
-                OrderDetail(
+                    2,
                     "Cupcake Buenasso 300g",
+                    20.0,
                     2
                 )
             ),
-            145.0,
+            126.5,
             "joselito@uol.com",
             "(11) 98877-6655",
             "06010-100",
             "Apto 9",
             "99",
-            OrderStatus.NOVO.toString()
+            OrderStatus.CARRINHO.toString()
         ),
         Order(
-            2,
-            "0000000000000",
+            1,
+            "946fcb4057657c1a",
             listOf(
                 OrderDetail(
+                1,
                 "Cookie Cake Red Velvet Oreo 300g",
+                35.5,
                 2
                 )
             ),
-            75.0,
-            "hermes@uol.com",
-            "(11) 98877-1255",
-            "06010-101",
-            "Casa",
-            "20",
+            61.0,
+            "joselito@uol.com",
+            "(11) 98877-6655",
+            "06010-100",
+            "Apto 9",
+            "99",
             OrderStatus.PREPARACAO.toString()
-        ),
-        Order(
-            3,
-            "0000000000000",
-            listOf(
-                OrderDetail(
-                    "Cookie Cake Red Velvet Oreo 300g",
-                    1
-                )
-            ),
-            25.0,
-            "hermes@uol.com",
-            "(11) 98877-1255",
-            "06010-101",
-            "Casa",
-            "20",
-            OrderStatus.CARRINHO.toString()
         )
     )
 
     override suspend fun getAllOrders(): List<Order> {
-        return orders
-    }
-
-    override suspend fun getAllOrdersForManagement(): List<Order> {
-        return orders.filter { it.status != "CARRINHO" }
-    }
-
-    override suspend fun getAllOrdersByDeviceId(deviceId: String): List<Order> {
         return orders.filter { it.deviceId == deviceId }
+    }
+
+    override suspend fun getOrderByStatus(status: String): Order? {
+        return orders.find { it.deviceId == deviceId && it.status == status }
+    }
+
+    override suspend fun createOrder(): Order {
+        val newOrder = Order(
+            id = getNextProductId(),
+            deviceId = deviceId,
+            details = mutableListOf(),
+            status = OrderStatus.CARRINHO.toString()
+        )
+        orders.add(newOrder)
+        return newOrder
     }
 
     override suspend fun getNextProductId(): Int {

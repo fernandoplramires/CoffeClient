@@ -1,39 +1,25 @@
 package br.com.ramires.gourment.coffeclient.ui.product
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import br.com.ramires.gourment.coffeclient.data.model.Product
+import br.com.ramires.gourment.coffeclient.data.repository.order.OrderRepositoryInterface
 import br.com.ramires.gourment.coffeclient.data.repository.product.ProductRepositoryInterface
 import br.com.ramires.gourment.coffeclient.databinding.FragmentProductsBinding
 
-class ProductsFragment(private val repository: ProductRepositoryInterface) : Fragment() {
+class ProductsFragment(
+    private val productsRepository: ProductRepositoryInterface,
+    private val ordersRepository: OrderRepositoryInterface
+) : Fragment() {
 
     private var _binding: FragmentProductsBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: ProductViewModel
     private lateinit var adapter: ProductAdapter
-
-    // Adicionado ActivityResultLauncher para substituir o startActivityForResult
-    private val imagePickerLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val selectedImageUri = result.data?.data
-                val editingProduct = viewModel.editingProduct
-                if (editingProduct != null && selectedImageUri != null) {
-                    viewModel.updateProductImage(requireContext(), editingProduct, selectedImageUri)
-                    adapter.notifyItemChanged(adapter.getPositionById(editingProduct.id!!))
-                }
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,39 +33,31 @@ class ProductsFragment(private val repository: ProductRepositoryInterface) : Fra
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val factory = ProductViewModelFactory(repository)
+        val factory = ProductViewModelFactory(productsRepository, ordersRepository)
         viewModel = ViewModelProvider(this, factory).get(ProductViewModel::class.java)
 
         setupRecyclerView()
+
+        // Carregar o pedido com status "CARRINHO" primeiro
+        viewModel.loadCartOrder()
         observeViewModel()
     }
 
     private fun setupRecyclerView() {
         adapter = ProductAdapter { action, product ->
             when (action) {
-                ProductAdapter.ActionType.EDIT -> viewModel.startEditingProduct(product)
-                ProductAdapter.ActionType.REMOVE -> showRemoveConfirmationDialog(product)
-                ProductAdapter.ActionType.SAVE -> viewModel.saveEditedProduct(product)
-                ProductAdapter.ActionType.UPLOAD_IMAGE -> selectImageFromGallery()
+                ProductAdapter.ActionType.SAVE -> viewModel.addProductToCart(product)
+                ProductAdapter.ActionType.REMOVE -> viewModel.removeProductFromCart(product)
             }
         }
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
     }
 
-    private fun selectImageFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
-        }
-        imagePickerLauncher.launch(intent)
-    }
-
-    private fun showRemoveConfirmationDialog(product: Product) {
-        //TODO
-    }
-
     private fun observeViewModel() {
         viewModel.products.observe(viewLifecycleOwner) { products ->
+
+            // Lista vazia de produtos
             if (products.isNullOrEmpty()) {
                 binding.textViewEmptyState.visibility = View.VISIBLE
                 binding.recyclerView.visibility = View.GONE
@@ -87,7 +65,14 @@ class ProductsFragment(private val repository: ProductRepositoryInterface) : Fra
                 binding.textViewEmptyState.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(products)
+                adapter.notifyDataSetChanged()
             }
+        }
+
+        // Observa o pedido com status "CARRINHO"
+        viewModel.cartOrder.observe(viewLifecycleOwner) { cartOrder ->
+            val selectedProductIds = cartOrder?.details?.mapNotNull { it.id } ?: emptyList()
+            adapter.setSelectedProducts(selectedProductIds)
         }
     }
 

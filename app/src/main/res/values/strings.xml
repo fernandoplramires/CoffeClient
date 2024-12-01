@@ -1,19 +1,8 @@
 <resources>
     <string name="app_name">CoffeClient</string>
     <!-- Strings para confirmação de remoção -->
-    <string name="cancel">Cancelar</string>
-    <string name="confirm">Confirmar</string>
-    <string name="total_amount">Total: R$ %.2f</string>
     <string name="increase_quantity">Aumenta a quantidade do item</string>
     <string name="decrease_quantity">Diminui a quantidade do item</string>
     <string name="remove_item">Remove o item</string>
-    <string name="product_image_preview">Pré-visualização da imagem</string>
-    <string name="upload_image">Botão de upload de imagem</string>
     <!-- Outras strings -->
-    <string-array name="order_status_options">
-        <item>NOVO</item>
-        <item>CANCELADO</item>
-        <item>PREPARACAO</item>
-        <item>FINALIZADO</item>
-    </string-array>
 </resources>

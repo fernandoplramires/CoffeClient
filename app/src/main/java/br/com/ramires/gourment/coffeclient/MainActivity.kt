@@ -3,6 +3,8 @@ package br.com.ramires.gourment.coffeclient
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import br.com.ramires.gourment.coffeclient.data.repository.order.FirebaseOrderRepository
@@ -14,6 +16,7 @@ import br.com.ramires.gourment.coffeclient.data.repository.product.ProductReposi
 import br.com.ramires.gourment.coffeclient.databinding.ActivityMainBinding
 import br.com.ramires.gourment.coffeclient.ui.order.OrdersFragment
 import br.com.ramires.gourment.coffeclient.ui.product.ProductsFragment
+import br.com.ramires.gourment.coffeclient.util.GeoUtils
 import com.google.android.material.tabs.TabLayout
 
 class MainActivity : AppCompatActivity() {
@@ -37,8 +40,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val repositoryType = intent.getStringExtra("REPOSITORY_TYPE")
-        initializeRepositories(repositoryType)
+        initializeRepositories(repositoryType, deviceId)
+
+        GeoUtils.setMockMode(repositoryType ?: "REAL")
+        Log.d("MainActivity", "GeoUtils MOCK_MODE is set to: ${GeoUtils.isMockMode()}")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -46,16 +53,16 @@ class MainActivity : AppCompatActivity() {
         setupTabLayoutStyle()
         setupTabListener()
 
-        replaceFragment(ProductsFragment(productRepository!!))
+        replaceFragment(ProductsFragment(productRepository!!, orderRepository!!))
     }
 
-    private fun initializeRepositories(repositoryType: String?) {
+    private fun initializeRepositories(repositoryType: String?, deviceId: String) {
         if (repositoryType == "MOCK") {
             productRepository = MockProductRepository()
-            orderRepository = MockOrderRepository()
+            orderRepository = MockOrderRepository(deviceId)
         } else {
             productRepository = FirebaseProductRepository()
-            orderRepository = FirebaseOrderRepository()
+            orderRepository = FirebaseOrderRepository(deviceId)
         }
     }
 
@@ -72,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 tab?.view?.setBackgroundResource(R.drawable.tab_selected_background)
                 when (tab?.position) {
-                    0 -> replaceFragment(ProductsFragment(productRepository!!))
+                    0 -> replaceFragment(ProductsFragment(productRepository!!, orderRepository!!))
                     1 -> replaceFragment(OrdersFragment(orderRepository!!))
                 }
             }

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Simulador de Pagamento</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+            button { margin: 10px; padding: 15px; font-size: 16px; }
+        </style>
+    </head>
+    <body>
+        <h1>Simulação de Pagamento</h1>
+        <p>Escolha uma opção abaixo:</p>
+        <button onclick="window.location.href='app://callback?status=success'">Aprovar Pagamento</button>
+        <button onclick="window.location.href='app://callback?status=error'">Recusar Pagamento</button>
+    </body>
+</html>

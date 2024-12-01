@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
@@ -22,8 +23,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@android:color/black"
             android:background="@drawable/item_order_header_background"
-            android:textStyle="bold"
-             />
+            android:textStyle="bold" />
 
         <!-- Detalhes Expandidos -->
         <LinearLayout
@@ -67,6 +67,7 @@
                     android:layout_weight="1"
                     android:text="Valor Total: R$ 10,00"
                     android:textStyle="bold"
+                    android:textColor="@android:color/holo_blue_dark"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
             </LinearLayout>
@@ -88,15 +89,26 @@
                     android:padding="4dp"
                     android:textSize="14sp"
                     android:textAppearance="?attr/textAppearanceBody1" />
-                <TextView
+                <EditText
                     android:id="@+id/textViewEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:background="@drawable/item_order_field_background"
-                    android:text="cliente@email.com"
                     android:textSize="14sp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:hint="E-mail"
+                    android:inputType="textEmailAddress"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:enabled="true" />
+                <TextView
+                    android:id="@+id/textViewEmailError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:textSize="12sp" />
 
                 <!-- Telefone -->
                 <TextView
@@ -107,15 +119,26 @@
                     android:padding="4dp"
                     android:textSize="14sp"
                     android:textAppearance="?attr/textAppearanceBody1" />
-                <TextView
+                <EditText
                     android:id="@+id/textViewPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:background="@drawable/item_order_field_background"
-                    android:text="(11) 98777-6655"
                     android:textSize="14sp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:hint="Telefone"
+                    android:inputType="phone"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:enabled="true" />
+                <TextView
+                    android:id="@+id/textViewPhoneError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:textSize="12sp" />
 
                 <!-- CEP -->
                 <TextView
@@ -126,15 +149,27 @@
                     android:padding="4dp"
                     android:textSize="14sp"
                     android:textAppearance="?attr/textAppearanceBody1" />
-                <TextView
+                <EditText
                     android:id="@+id/textViewZipCode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:background="@drawable/item_order_field_background"
-                    android:text="06010-100"
                     android:textSize="14sp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:hint="CEP"
+                    android:inputType="number"
+                    android:maxLength="9"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:enabled="true" />
+                <TextView
+                    android:id="@+id/textViewZipCodeError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:textSize="12sp" />
 
                 <!-- Complemento -->
                 <TextView
@@ -145,15 +180,26 @@
                     android:padding="4dp"
                     android:textSize="14sp"
                     android:textAppearance="?attr/textAppearanceBody1" />
-                <TextView
+                <EditText
                     android:id="@+id/textViewComplement"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:background="@drawable/item_order_field_background"
-                    android:text="Apto 101"
                     android:textSize="14sp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:hint="Complemento"
+                    android:inputType="text"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:enabled="true" />
+                <TextView
+                    android:id="@+id/textViewComplementError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:textSize="12sp" />
 
                 <!-- Número -->
                 <TextView
@@ -164,62 +210,52 @@
                     android:padding="4dp"
                     android:textSize="14sp"
                     android:textAppearance="?attr/textAppearanceBody1" />
-                <TextView
+                <EditText
                     android:id="@+id/textViewNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
                     android:background="@drawable/item_order_field_background"
-                    android:text="99"
                     android:textSize="14sp"
-                    android:textAppearance="?attr/textAppearanceBody2" />
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:hint="Número"
+                    android:inputType="number"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:enabled="true" />
+                <TextView
+                    android:id="@+id/textViewNumberError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:textSize="12sp" />
             </LinearLayout>
 
-            <!-- Botões e Menu -->
+            <!-- Botao Finalizar pedido -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:background="@drawable/item_order_section_background"
                 android:padding="8dp"
                 android:paddingTop="8dp">
 
-                <!-- Botão Editar e Menu Status -->
-                <Button
-                    android:id="@+id/buttonEditOrder"
-                    android:layout_width="70dp"
-                    android:layout_height="25dp"
-                    android:layout_gravity="left"
-                    android:background="@drawable/item_order_button_background"
-                    android:text="Editar"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
-
-                <!-- Menu Status -->
-                <Spinner
-                    android:id="@+id/spinnerOrderStatus"
-                    android:layout_width="0dp"
-                    android:layout_height="25dp"
-                    android:layout_weight="2"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_gravity="center"
-                    android:entries="@array/order_status_options"
-                    android:enabled="false"
-                    android:textColor="@color/black"
-                    android:textSize="12sp"
-                    android:scrollbarSize="16dp"
-                    android:textAlignment="center"
-                    android:gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                <TextView
+                    android:id="@+id/textViewError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    android:text="Erro na validação dos campos" />
 
                 <Button
-                    android:id="@+id/buttonSaveOrder"
-                    android:layout_width="70dp"
+                    android:id="@+id/buttonCheckoutOrder"
+                    android:layout_width="140dp"
                     android:layout_height="25dp"
-                    android:layout_gravity="right"
                     android:background="@drawable/item_order_button_background"
-                    android:text="Salvar"
+                    android:text="Finalizar Pedido"
                     android:enabled="false"
                     android:textColor="@color/black"
                     android:textSize="12sp" />
