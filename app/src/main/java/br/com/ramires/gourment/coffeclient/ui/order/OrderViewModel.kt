@@ -1,6 +1,5 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,24 +7,12 @@ import androidx.lifecycle.viewModelScope
 import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import br.com.ramires.gourment.coffeclient.data.repository.order.OrderRepositoryInterface
-import br.com.ramires.gourment.coffeclient.util.Validates
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewModel() {
 
-    //Pedidos
     private val _orders = MutableLiveData<List<Order>>()
     val orders: LiveData<List<Order>> get() = _orders
-
-    /*TODO
-    //Callback de Pagamento
-    private val _eventNavigateToPayment = MutableLiveData<Order>()
-    val eventNavigateToPayment: LiveData<Order> get() = _eventNavigateToPayment
-    private val _errorMessage = MutableLiveData<String?>()
-    val errorMessage: LiveData<String?> get() = _errorMessage
-    */
 
     init {
         loadOrders()
@@ -59,6 +46,10 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
         return newCartOrderId
     }
 
+    fun getOrderById(orderId: Int): Order? {
+        return orders.value?.find { it.id == orderId }
+    }
+
     fun updateOrder(updatedOrder: Order) {
         viewModelScope.launch {
             try {
@@ -74,24 +65,4 @@ class OrderViewModel(private val repository: OrderRepositoryInterface) : ViewMod
     fun expandOrder(orderId: Int) {
         _orders.value = _orders.value?.map { it.copy() }
     }
-
-    /*TODO
-    fun finalizeOrder(order: Order) {
-        viewModelScope.launch {
-            try {
-                // Atualiza o status do pedido para "NOVO"
-                order.status = OrderStatus.NOVO.toString()
-                repository.updateOrder(order)
-
-                // Enviar requisição ao navegador
-                _eventNavigateToPayment.postValue(order)
-            } catch (e: Exception) {
-                _errorMessage.postValue("Erro ao finalizar pedido: ${e.message}")
-            }
-        }
-    }
-    fun clearErrorMessage() {
-        _errorMessage.value = null
-    }
-    */
 }

@@ -1,7 +1,7 @@
 package br.com.ramires.gourment.coffeclient.ui.order
 
+import android.content.Intent
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +16,7 @@ import br.com.ramires.gourment.coffeclient.R
 import br.com.ramires.gourment.coffeclient.data.model.Order
 import br.com.ramires.gourment.coffeclient.data.model.OrderStatus
 import br.com.ramires.gourment.coffeclient.databinding.ItemOrderBinding
+import br.com.ramires.gourment.coffeclient.ui.payment.PaymentMockActivity
 import br.com.ramires.gourment.coffeclient.util.Convertions
 import br.com.ramires.gourment.coffeclient.util.GeoUtils
 import br.com.ramires.gourment.coffeclient.util.Helpers
@@ -28,7 +29,8 @@ import kotlinx.coroutines.withContext
 
 class OrderAdapter(
     private val onOrderClick: (Int) -> Unit,
-    private val onOrderSave: (Order, () -> Unit) -> Unit
+    private val onOrderSave: (Order, () -> Unit) -> Unit,
+    private val onPaymentRequest: (Order) -> Unit
 ) : RecyclerView.Adapter<OrderAdapter.OrderViewHolder>() {
 
     private val orders = mutableListOf<Order>()
@@ -239,17 +241,13 @@ class OrderAdapter(
                             zipCode = textViewZipCode.text.toString(),
                             complement = textViewComplement.text.toString(),
                             number = textViewNumber.text.toString(),
-                            status = OrderStatus.NOVO.toString()
+                            status = OrderStatus.CARRINHO.toString()
                         )
 
-                        // Atualiza o pedido e sincroniza a exibição do alerta
+                        // Salva o pedido antes de chamar o pagamento
                         onOrderSave(updatedOrder) {
-                            // Exibe o `AlertDialog` após atualizar os pedidos
-                            AlertDialog.Builder(root.context)
-                                .setTitle("AVISO")
-                                .setMessage("Pedido #${updatedOrder.id} foi gerado com sucesso!")
-                                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                                .show()
+                            // Inicia o Simulador de Pagamento
+                            onPaymentRequest(updatedOrder)
                         }
                     }
                 }

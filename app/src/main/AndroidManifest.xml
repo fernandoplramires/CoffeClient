@@ -32,5 +32,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Simulador de Pagamento -->
+        <activity android:name=".ui.payment.PaymentMockActivity"
+            android:exported="true" />
     </application>
 </manifest>
